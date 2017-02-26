@@ -478,14 +478,9 @@ void *raytracing_thread_funct(void *args)
     calculateBasisVectors(u, v, w, arg->view);
 
     idx_stack stk;
-
     int factor = sqrt(SAMPLES);
 
-    int h_size = arg->height / arg->thread_count;
-    int h_start = h_size * arg->myrank;
-    int h_end = (arg->myrank < arg->thread_count - 1) ?
-                h_size * (arg->myrank + 1) : arg->height;
-    for (int j = h_start; j < h_end; j ++) {
+    for (int j = arg->myrank; j < arg->height; j += arg->thread_count) {
         for (int i = 0; i < arg->width; i++) {
             double r = 0, g = 0, b = 0;
             /* MSAA */
@@ -522,7 +517,7 @@ void raytracing(uint8_t *pixels, color background_color,
                 light_node lights, const viewpoint *view,
                 int width, int height)
 {
-    const int thread_count = 4;;
+    const int thread_count = 4;
     pthread_t thread[thread_count];
     struct raytracing_thread_arg arg[thread_count];
 
